@@ -4,6 +4,8 @@ import {ArrowRight, ArrowUpRight, Clock, Layers} from "lucide-react";
 import Button from "../../components/ui/Button";
 import Upload from "../../components/ui/Upload";
 import {useNavigate} from "react-router";
+import {useState} from "react";
+import {createProject} from "../../lib/puter.action";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,11 +16,32 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<DesignItem[]>([]);
 
   const handleUploadComplete = async (base64Image: string) => {
       const newId = Date.now().toString();
+      const name = `Residence ${newId}`;
 
-      navigate(`/visualizer/${newId}`);
+      const newItem = {
+          id: newId, name, sourceImage: base64Image,
+          renderedImage: undefined,
+          timestamp: Date.now()
+      }
+
+      const saved = await createProject({ item: newItem, visibility: 'private' });
+      if (!saved) {
+          console.error("Failed to create project");
+          return false;
+      }
+      setProjects((prev) => [saved, ... prev]);
+
+      navigate(`/visualizer/${newId}`,{
+          state: {
+              initialImage: saved.sourceImage,
+              initialRendered: saved.renderedImage || null,
+              name
+          }
+      });
 
       return true;
   }
@@ -33,7 +56,7 @@ export default function Home() {
 
                 <p>Introducing RoomMatrix</p>
             </div>
-            <h1>Build beautiful spaces at the speed of thought with roomMatrix</h1>
+            <h1>Build beautiful spaces at the speed of thought with RoomMatrix</h1>
             <p className="subtitle">RoomMatrix is an AI-first design environment that helps you visualize, render architectural projects faster than ever.</p>
             <div className="actions">
                 <a href="#upload" className="cta">Get Started<ArrowRight className="icon" />
@@ -64,28 +87,32 @@ export default function Home() {
                       </div>
                   </div>
                   <div className="projects-grid">
-                      <div className="project-card group">
-                          <div className="preview">
-                              <img src="https://roomify-mlhuk267-dfwu1i.puter.site/projects/1770803585402/rendered.png"
-                              alt="Project Preview" />
-                              <div className="badge">
-                                  <span>Community</span>
-                              </div>
-                          </div>
-                          <div className="card-body">
-                              <div>
-                                  <h3>Project Mumbai</h3>
-                                  <div className="meta">
-                                      <Clock size={12} />
-                                      <span>{new Date('01.01.2027').toLocaleDateString()}</span>
-                                      <span>By udit bhardwaj</span>
+                      {projects.map(({id, name, renderedImage, sourceImage,
+                      timestamp}) => (
+                          <div key={id} className="project-card group">
+                              <div className="preview">
+                                  <img src={renderedImage || sourceImage} alt="Project" />
+
+                                  <div className="badge">
+                                      <span>Community</span>
                                   </div>
                               </div>
+
+                              <div className="card-body">
+                                  <div>
+                                      <h3>{name}</h3>
+                                      <div className="meta">
+                                          <Clock size={12} />
+                                          <span>{new Date(timestamp).toLocaleDateString()}</span>
+                                          <span>By Udit bhardwaj</span>
+                                      </div>
+                                  </div>
                               <div className="arrow">
-                                  <ArrowUpRight size={18} />
+                                <ArrowUpRight size={18} />
                               </div>
                           </div>
-                      </div>
+                          </div>
+                      ))}
                   </div>
               </div>
           </section>
