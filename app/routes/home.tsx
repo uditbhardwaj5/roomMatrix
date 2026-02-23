@@ -79,10 +79,8 @@ export default function Home() {
             <h1>Build beautiful spaces at the speed of thought with RoomMatrix</h1>
             <p className="subtitle">RoomMatrix is an AI-first design environment that helps you visualize, render architectural projects faster than ever.</p>
             <div className="actions">
-                <a href="#upload" className="cta">Get Started<ArrowRight className="icon" />
-                </a>
+                <a href="#upload" className="cta">Get Started<ArrowRight className="icon" /></a>
 
-                <Button variant="outline" size="lg" className="demo">Watch Demo</Button>
             </div>
             <div id="upload" className="upload-shell">
                 <div className="grid-overlay"/>
