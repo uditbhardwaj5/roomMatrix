@@ -328,6 +328,10 @@
           .share {
             @apply bg-black text-white h-9 shadow-sm hover:bg-zinc-800;
           }
+
+          .share-status {
+            @apply text-xs font-mono uppercase tracking-widest text-zinc-500;
+          }
         }
       }
 

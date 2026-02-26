@@ -5,6 +5,7 @@ import {Box, Download, RefreshCcw, Share2, X} from "lucide-react";
 import Button from "../../components/ui/Button";
 import {createProject, getProjectById} from "../../lib/puter.action";
 import {ReactCompareSlider, ReactCompareSliderImage} from "react-compare-slider";
+import {SHARE_STATUS_RESET_DELAY_MS} from "../../lib/constants";
 
 const VisualizerId = () => {
     const { id } = useParams();
@@ -18,6 +19,9 @@ const VisualizerId = () => {
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [currentImage, setCurrentImage] = useState<string | null>(null);
+    const [shareStatus, setShareStatus] = useState<ShareStatus>("idle");
+
+    const shareResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleBack = () => navigate('/');
     const handleExport = () => {
@@ -30,6 +34,43 @@ const VisualizerId = () => {
         link.click();
         document.body.removeChild(link);
     }
+
+    const copyToClipboard = async (value: string) => {
+        try {
+            await navigator.clipboard.writeText(value);
+            return true;
+        } catch {
+            const textarea = document.createElement("textarea");
+            textarea.value = value;
+            textarea.setAttribute("readonly", "true");
+            textarea.style.position = "absolute";
+            textarea.style.left = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.select();
+            const success = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            return success;
+        }
+    };
+
+    const handleShare = async () => {
+        if (!currentImage) return;
+
+        const linkToCopy = project?.publicPath || project?.renderedPath || currentImage;
+        const copied = await copyToClipboard(linkToCopy);
+
+        if (!copied) return;
+
+        setShareStatus("done");
+
+        if (shareResetTimeoutRef.current) {
+            clearTimeout(shareResetTimeoutRef.current);
+        }
+
+        shareResetTimeoutRef.current = setTimeout(() => {
+            setShareStatus("idle");
+        }, SHARE_STATUS_RESET_DELAY_MS);
+    };
 
     const runGeneration = async (item: DesignItem) => {
         if(!id || !item.sourceImage) return;
@@ -93,6 +134,14 @@ const VisualizerId = () => {
     }, [id]);
 
     useEffect(() => {
+        return () => {
+            if (shareResetTimeoutRef.current) {
+                clearTimeout(shareResetTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         if (
             isProjectLoading ||
             hasInitialGenerated.current ||
@@ -141,10 +190,13 @@ const VisualizerId = () => {
                             >
                                 <Download className="w-4 h-4 mr-2" /> Export
                             </Button>
-                            <Button size="sm" onClick={() => {}} className="share">
+                            <Button size="sm" onClick={handleShare} className="share" disabled={!currentImage}>
                                 <Share2 className="w-4 h-4 mr-2" />
                                 Share
                             </Button>
+                            {shareStatus === "done" && (
+                                <span className="share-status">Link copied to clipboard</span>
+                            )}
                         </div>
                     </div>
 
