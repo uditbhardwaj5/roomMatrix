@@ -6,7 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import react, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 
 import type { Route } from "./+types/root";
 import "./app.css";

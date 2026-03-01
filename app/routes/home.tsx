@@ -1,7 +1,6 @@
 import type { Route } from "./+types/home";
 import Navbar from "../../components/Navbar";
 import {ArrowRight, ArrowUpRight, Clock, Layers} from "lucide-react";
-import Button from "../../components/ui/Button";
 import Upload from "../../components/ui/Upload";
 import {useNavigate} from "react-router";
 import {useEffect, useRef, useState} from "react";
@@ -9,8 +8,8 @@ import {createProject, getProjects} from "../../lib/puter.action";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+        { title: "RoomMatrix" },
+        { name: "description", content: "AI floor plan visualizer and 3D render workspace." },
   ];
 }
 
@@ -90,7 +89,7 @@ export default function Home() {
                             <Layers className="icon"/>
                         </div>
                         <h3>Upload your floor plan</h3>
-                        <p>Supports JPG, PNG, formats upto 10MB</p>
+                        <p>Supports JPG, PNG formats up to 50MB</p>
                     </div>
                     <Upload onComplete= {handleUploadComplete}   />
                 </div>
