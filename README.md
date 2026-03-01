@@ -1,87 +1,97 @@
-# Welcome to React Router!
+# RoomMatrix
 
-A modern, production-ready template for building full-stack React applications using React Router.
+RoomMatrix is an AI-powered floor plan visualizer.
+It lets you upload a 2D floor plan image and automatically generate a top-down, photorealistic 3D-style render.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## What this project does
 
-## Features
+- Upload a floor plan (`.jpg`, `.jpeg`, `.png`) from the home page.
+- Save the project metadata and image URLs through a Puter Worker API.
+- Generate an AI render from the uploaded floor plan using Puter AI (`txt2img` with input image).
+- Compare **Before vs After** using an interactive slider.
+- Export the generated image as a PNG.
+- Share by copying the hosted image link to clipboard.
+- View previous projects in a project grid.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## User flow (simple)
 
-## Getting Started
+1. Sign in with Puter.
+2. Upload a floor plan image.
+3. A new project is created and you are redirected to `/visualizer/:id`.
+4. If no render exists yet, AI generation starts automatically.
+5. You can compare, export, and share the result.
 
-### Installation
+## Tech stack
 
-Install the dependencies:
+### Frontend
+- React 19 + TypeScript
+- React Router v7 (framework mode)
+- Vite 7
+- Tailwind CSS v4
+- `lucide-react` for icons
+- `react-compare-slider` for before/after preview
+
+### Platform / backend services
+- Puter SDK (`@heyputer/puter.js`) for:
+  - Authentication (`puter.auth`)
+  - Key-value storage (`puter.kv`)
+  - Worker API calls (`puter.workers.exec`)
+  - Hosted file storage (`puter.hosting`, `puter.fs`)
+  - AI image generation (`puter.ai.txt2img`)
+
+### Runtime / tooling
+- Node.js 20+
+- npm
+
+
+## Setup (local development)
+
+### 1) Prerequisites
+
+- Node.js `>=20`
+- npm
+- A Puter account (for auth, worker, storage, and AI calls)
+
+### 2) Install dependencies
 
 ```bash
 npm install
 ```
 
-### Development
+### 3) Configure environment variables
 
-Start the development server with HMR:
+Create or update `.env.local` in the project root:
+
+```env
+VITE_PUTER_WORKER_URL=https://<your-worker-subdomain>.puter.work
+```
+
+> This app already uses `VITE_PUTER_WORKER_URL` inside `lib/constants.ts`.
+
+### 4) Run development server
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+Open the URL shown in the terminal (usually `http://localhost:5173`).
 
-## Building for Production
-
-Create a production build:
+### 5) Build and run production locally
 
 ```bash
 npm run build
+npm run start
 ```
 
-## Deployment
+## Available scripts
 
-### Docker Deployment
+- `npm run dev` — Start local dev server
+- `npm run build` — Build app for production
+- `npm run start` — Serve built output (`build/server/index.js`)
+- `npm run typecheck` — Generate route types and run TypeScript checks
 
-To build and run using Docker:
+## Notes
 
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+- Upload interaction is gated by sign-in state.
+- Project save/list/get calls depend on a working Puter Worker URL.
+- AI generation uses a strict prompt from `lib/constants.ts` to convert 2D plans into top-down rendered outputs.
